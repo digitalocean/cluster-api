@@ -65,6 +65,7 @@ type KubeadmControlPlaneReconciler struct {
 	controller       controller.Controller
 	recorder         record.EventRecorder
 	Tracker          *remote.ClusterCacheTracker
+	EtcdDialTimeout  time.Duration
 	WatchFilterValue string
 
 	managementCluster         internal.ManagementCluster
@@ -101,7 +102,11 @@ func (r *KubeadmControlPlaneReconciler) SetupWithManager(ctx context.Context, mg
 		if r.Tracker == nil {
 			return errors.New("cluster cache tracker is nil, cannot create the internal management cluster resource")
 		}
-		r.managementCluster = &internal.Management{Client: r.Client, Tracker: r.Tracker}
+		r.managementCluster = &internal.Management{
+			Client:          r.Client,
+			Tracker:         r.Tracker,
+			EtcdDialTimeout: r.EtcdDialTimeout,
+		}
 	}
 
 	if r.managementClusterUncached == nil {
